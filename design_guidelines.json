@@ -1,0 +1,144 @@
+{
+  "theme": "Auto (Light/Dark Support)",
+  "archetype": "Archetype 3 (Pastel & Soft) adapted for High-Contrast Mobile",
+  "domain": "Productivity / Habit Tracker / AI Coach",
+  "typography": {
+    "font_family_primary": "Manrope",
+    "font_family_fallback": "System",
+    "headings": {
+      "h1": { "fontSize": 36, "fontWeight": "800", "letterSpacing": -1.0, "lineHeight": 44 },
+      "h2": { "fontSize": 28, "fontWeight": "700", "letterSpacing": -0.5, "lineHeight": 34 },
+      "h3": { "fontSize": 22, "fontWeight": "600", "letterSpacing": -0.3, "lineHeight": 28 }
+    },
+    "body": {
+      "large": { "fontSize": 18, "fontWeight": "400", "lineHeight": 26 },
+      "regular": { "fontSize": 16, "fontWeight": "400", "lineHeight": 24 },
+      "small": { "fontSize": 14, "fontWeight": "500", "lineHeight": 20 }
+    },
+    "accent": {
+      "label": { "fontSize": 12, "fontWeight": "700", "letterSpacing": 1.2, "textTransform": "uppercase" }
+    }
+  },
+  "colors": {
+    "light": {
+      "background": "#FBFBFD",
+      "surface": "#FFFFFF",
+      "surface_alt": "#F2F2F7",
+      "primary": "#8C65F7",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#58D6A4",
+      "secondary_foreground": "#FFFFFF",
+      "accent": "#FFD37D",
+      "text_primary": "#1C1C1E",
+      "text_secondary": "#8E8E93",
+      "border": "#E5E5EA",
+      "error": "#FF453A",
+      "success": "#34C759",
+      "ai_bubble": "#F0EAFD"
+    },
+    "dark": {
+      "background": "#0F0F13",
+      "surface": "#1C1C1E",
+      "surface_alt": "#2C2C2E",
+      "primary": "#A688FA",
+      "primary_foreground": "#000000",
+      "secondary": "#6DE3B5",
+      "secondary_foreground": "#000000",
+      "accent": "#FFE19E",
+      "text_primary": "#F2F2F7",
+      "text_secondary": "#AEAEB2",
+      "border": "#38383A",
+      "error": "#FF453A",
+      "success": "#32D74B",
+      "ai_bubble": "#2A1F45"
+    }
+  },
+  "spacing": {
+    "xs": 4,
+    "sm": 8,
+    "md": 16,
+    "lg": 24,
+    "xl": 32,
+    "2xl": 48
+  },
+  "radii": {
+    "sm": 8,
+    "md": 16,
+    "lg": 24,
+    "pill": 9999
+  },
+  "shadows": {
+    "light": {
+      "sm": { "shadowColor": "#000", "shadowOffset": { "width": 0, "height": 2 }, "shadowOpacity": 0.05, "shadowRadius": 8, "elevation": 2 },
+      "md": { "shadowColor": "#000", "shadowOffset": { "width": 0, "height": 6 }, "shadowOpacity": 0.08, "shadowRadius": 16, "elevation": 5 }
+    },
+    "dark": {
+      "sm": { "shadowColor": "#000", "shadowOffset": { "width": 0, "height": 2 }, "shadowOpacity": 0.3, "shadowRadius": 8, "elevation": 2 },
+      "md": { "shadowColor": "#000", "shadowOffset": { "width": 0, "height": 6 }, "shadowOpacity": 0.4, "shadowRadius": 16, "elevation": 5 }
+    }
+  },
+  "components": {
+    "Button": {
+      "primary": "Pill-shaped (borderRadius: 9999), paddingVertical: 16, paddingHorizontal: 24, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'. Bold text.",
+      "secondary": "Same as primary but backgroundColor is surface, borderWidth: 1, borderColor: border, text is text_primary."
+    },
+    "Card": {
+      "container": "borderRadius: 24, padding: 24, backgroundColor: surface, use shadow_sm.",
+      "header": "Row layout, flex wrap, bold titles."
+    },
+    "Input": {
+      "container": "borderRadius: 16, backgroundColor: surface_alt, paddingHorizontal: 16, paddingVertical: 14, borderWidth: 1, borderColor: border, fontSize: 16, color: text_primary"
+    },
+    "ChatBubble": {
+      "ai": "backgroundColor: ai_bubble, borderBottomLeftRadius: 4, borderRadius: 20, padding: 16.",
+      "user": "backgroundColor: primary, borderBottomRightRadius: 4, borderRadius: 20, padding: 16, color: primary_foreground."
+    },
+    "ProgressBar": {
+      "track": "height: 8, borderRadius: 4, backgroundColor: surface_alt.",
+      "fill": "height: 8, borderRadius: 4, backgroundColor: primary."
+    }
+  },
+  "layout_strategy": {
+    "screen_container": "flex: 1, backgroundColor: background",
+    "scroll_content": "paddingHorizontal: 24, paddingVertical: 32",
+    "header": "paddingTop: 48 (safe area), paddingBottom: 16, paddingHorizontal: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'",
+    "bottom_tab_bar": "backgroundColor: surface, borderTopWidth: 1, borderColor: border, height: 80, paddingBottom: 20"
+  },
+  "motion_and_interactions": {
+    "button_press": "Use TouchableOpacity with activeOpacity={0.7} or Pressable with scale down animation to 0.96.",
+    "list_items": "Staggered fade-in on load using Reanimated or LayoutAnimation.",
+    "check_task": "Haptic feedback (ImpactFeedbackStyle.Light) + scale bounce on the checkmark icon.",
+    "screen_transitions": "Native modal slides or custom fade-through for non-tab screens."
+  },
+  "image_urls": {
+    "ai_avatar": {
+      "url": "https://images.unsplash.com/photo-1747595435884-29c6b5235030?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwxfHxmcmllbmRseSUyMHJvYm90JTIwQUklMjAzZCUyMGNhcnRvb24lMjBjaGFyYWN0ZXIlMjBwcm9maWxlJTIwYXZhdGFyfGVufDB8fHx8MTc3NTkzMDgzM3ww&ixlib=rb-4.1.0&q=85",
+      "description": "3D stylized AI profile avatar representing 'May'."
+    },
+    "goal_productivity": {
+      "url": "https://images.unsplash.com/photo-1698077689052-73daf0d5b10b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzd8MHwxfHNlYXJjaHw0fHxmaXRuZXNzJTIwY29kZSUyMHByb2R1Y3Rpdml0eSUyMHJlYWRpbmclMjAzZCUyMGNhcnRvb24lMjBtb2Rlcm58ZW58MHx8fHwxNzc1OTMwODM5fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Productivity / Coding goal visual"
+    },
+    "goal_fitness": {
+      "url": "https://images.unsplash.com/photo-1743307478241-4b240c7f4e17?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzd8MHwxfHNlYXJjaHwyfHxmaXRuZXNzJTIwY29kZSUyMHByb2R1Y3Rpdml0eSUyMHJlYWRpbmclMjAzZCUyMGNhcnRvb24lMjBtb2Rlcm58ZW58MHx8fHwxNzc1OTMwODM5fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Fitness / Health goal visual"
+    }
+  },
+  "icons": {
+    "library": "lucide-react-native",
+    "size_default": 24,
+    "size_small": 16,
+    "size_large": 32
+  },
+  "instructions_to_main_agent": [
+    "This is a React Native mobile application. Do NOT use HTML tags (like <div> or <span>) or Tailwind className props.",
+    "Use only React Native primitive components (View, Text, TextInput, TouchableOpacity, ScrollView, FlatList).",
+    "Use StyleSheet.create() for all styling. You can create a ThemeContext to supply light/dark mode colors dynamically.",
+    "Incorporate the colors, spacing (xs to 2xl), and radii (sm to pill) directly into your styles.",
+    "When displaying the AI (May) in chat, use the provided ai_avatar image URL.",
+    "For user action feedback, utilize React Native's standard TouchableOpacity or Pressable.",
+    "All interactive elements must include 'testID' (the React Native equivalent of data-testid), eg testID='login-submit-button'.",
+    "Do NOT use Expo Router unless specified; if using pure React Navigation, structure standard Tab and Stack navigators.",
+    "Use lucide-react-native for all icons."
+  ]
+}
