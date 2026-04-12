@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="20" time="17.127" timestamp="2026-04-12T04:54:51.547671+00:00" hostname="agent-env-d3384f2c-b603-4f78-99f4-dc16736d6610"><testcase classname="tests.test_auth.TestAuth" name="test_guest_login" time="0.295" /><testcase classname="tests.test_auth.TestAuth" name="test_admin_login" time="0.400" /><testcase classname="tests.test_auth.TestAuth" name="test_login_invalid_credentials" time="0.363" /><testcase classname="tests.test_auth.TestAuth" name="test_register_new_user" time="0.367"><failure message="AssertionError: Email mismatch&#10;assert 'test_user_c12c72bb@may.test' == 'TEST_user_c12c72bb@may.test'&#10;  &#10;  - TEST_user_c12c72bb@may.test&#10;  ? ^^^^&#10;  + test_user_c12c72bb@may.test&#10;  ? ^^^^">tests/test_auth.py:64: in test_register_new_user
+    assert data["user"]["email"] == test_email, "Email mismatch"
+E   AssertionError: Email mismatch
+E   assert 'test_user_c12c72bb@may.test' == 'TEST_user_c12c72bb@may.test'
+E     
+E     - TEST_user_c12c72bb@may.test
+E     ? ^^^^
+E     + test_user_c12c72bb@may.test
+E     ? ^^^^</failure></testcase><testcase classname="tests.test_auth.TestAuth" name="test_register_duplicate_email" time="0.108" /><testcase classname="tests.test_auth.TestAuth" name="test_get_me_authenticated" time="0.375" /><testcase classname="tests.test_auth.TestAuth" name="test_get_me_unauthenticated" time="0.148" /><testcase classname="tests.test_goals.TestGoals" name="test_create_goal_with_ai_plan" time="6.675" /><testcase classname="tests.test_goals.TestGoals" name="test_get_goals_list" time="0.402" /><testcase classname="tests.test_goals.TestGoals" name="test_get_goal_detail" time="3.642" /><testcase classname="tests.test_goals.TestGoals" name="test_accept_goal_activates_it" time="0.387"><failure message="KeyError: 'id'">tests/test_goals.py:72: in test_accept_goal_activates_it
+    goal_id = create_response.json()["id"]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'id'</failure></testcase><testcase classname="tests.test_goals.TestGoals" name="test_delete_goal" time="0.373"><failure message="KeyError: 'id'">tests/test_goals.py:96: in test_delete_goal
+    goal_id = create_response.json()["id"]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'id'</failure></testcase><testcase classname="tests.test_goals.TestTasks" name="test_get_today_tasks_for_active_goal" time="0.371"><failure message="KeyError: 'id'">tests/test_goals.py:122: in test_get_today_tasks_for_active_goal
+    goal_id = create_response.json()["id"]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'id'</failure></testcase><testcase classname="tests.test_goals.TestTasks" name="test_toggle_task_completion" time="0.381"><failure message="KeyError: 'id'">tests/test_goals.py:144: in test_toggle_task_completion
+    goal_id = create_response.json()["id"]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'id'</failure></testcase><testcase classname="tests.test_goals.TestChat" name="test_send_chat_message" time="0.376"><failure message="KeyError: 'id'">tests/test_goals.py:177: in test_send_chat_message
+    goal_id = create_response.json()["id"]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'id'</failure></testcase><testcase classname="tests.test_goals.TestChat" name="test_get_chat_history" time="0.411"><failure message="KeyError: 'id'">tests/test_goals.py:203: in test_get_chat_history
+    goal_id = create_response.json()["id"]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'id'</failure></testcase><testcase classname="tests.test_goals.TestDashboard" name="test_get_dashboard" time="0.414" /><testcase classname="tests.test_subscription.TestSubscription" name="test_get_subscription_plans" time="0.152" /><testcase classname="tests.test_subscription.TestSubscription" name="test_get_subscription_status" time="0.407" /><testcase classname="tests.test_subscription.TestSubscription" name="test_create_checkout_session" time="0.971" /></testsuite></testsuites>
