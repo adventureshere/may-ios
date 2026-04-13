@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../src/context/AuthContext';
 import { useTheme } from '../src/context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { MayCharacter } from '../src/components/MayAvatar';
+import { MayCharacter, useExpressionCycle } from '../src/components/MayAvatar';
 
 const MAY_IMAGE = 'https://customer-assets.emergentagent.com/job_daily-motivation-hub-1/artifacts/u0ogf74h_Screenshot%202025-12-12%20at%2010.30.14%E2%80%AFPM.png';
 
@@ -22,6 +22,8 @@ export default function WelcomeScreen() {
     try { await guestLogin(); router.replace('/(tabs)'); }
     catch (e) { console.error(e); } finally { setGuestLoading(false); }
   };
+
+  const expression = useExpressionCycle(4000);
 
   if (loading) return <View style={[styles.container, { backgroundColor: '#0a0a1a' }]}><ActivityIndicator size="large" color="#A688FA" /></View>;
 
@@ -40,7 +42,7 @@ export default function WelcomeScreen() {
         {/* May Character */}
         <View style={styles.characterWrap}>
           <View style={styles.glow} />
-          <MayCharacter size={180} />
+          <MayCharacter size={200} expression={expression} />
         </View>
 
         {/* Speech */}
