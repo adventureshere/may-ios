@@ -1,23 +1,27 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, Image } from 'react-native';
 
-type Props = { size?: number; showRing?: boolean; showStatus?: boolean };
+const mayCharImage = require('../../assets/may_character.png');
 
-export default function MayAvatar({ size = 48, showRing = false, showStatus = false }: Props) {
-  const ringSize = size + 8;
+type Props = { size?: number; showStatus?: boolean; showRing?: boolean };
+
+export default function MayAvatar({ size = 48, showStatus = false, showRing = false }: Props) {
+  const ringSize = size + (showRing ? 8 : 0);
   return (
     <View style={[styles.wrap, { width: ringSize, height: ringSize }]}>
       {showRing && <View style={[styles.ring, { width: ringSize, height: ringSize, borderRadius: ringSize / 2 }]} />}
-      <LinearGradient
-        colors={['#A688FA', '#7C4DFF', '#6200EA']}
-        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-        style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }]}
-      >
-        <Ionicons name="sparkles" size={size * 0.4} color="#fff" />
-      </LinearGradient>
+      <View style={[styles.avatarContainer, { width: size, height: size, borderRadius: size / 2 }]}>
+        <Image source={mayCharImage} style={{ width: size, height: size }} resizeMode="cover" />
+      </View>
       {showStatus && <View style={[styles.statusDot, { right: showRing ? 2 : -1, bottom: showRing ? 2 : -1 }]} />}
+    </View>
+  );
+}
+
+export function MayCharacter({ size = 160 }: { size?: number }) {
+  return (
+    <View style={[charStyles.container, { width: size, height: size, borderRadius: size / 2 }]}>
+      <Image source={mayCharImage} style={{ width: size, height: size }} resizeMode="cover" />
     </View>
   );
 }
@@ -36,17 +40,19 @@ export function MayBubble({ message, colors }: { message: string; colors: any })
 
 const styles = StyleSheet.create({
   wrap: { justifyContent: 'center', alignItems: 'center' },
-  ring: {
-    position: 'absolute', borderWidth: 2, borderColor: '#A688FA40',
-  },
-  avatar: {
-    justifyContent: 'center', alignItems: 'center',
-    shadowColor: '#7C4DFF', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 8,
+  ring: { position: 'absolute', borderWidth: 2, borderColor: '#A688FA40' },
+  avatarContainer: {
+    overflow: 'hidden', backgroundColor: '#0a0a1a',
+    shadowColor: '#7C4DFF', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
   },
   statusDot: {
     position: 'absolute', width: 12, height: 12, borderRadius: 6,
     backgroundColor: '#34C759', borderWidth: 2, borderColor: '#fff',
   },
+});
+
+const charStyles = StyleSheet.create({
+  container: { overflow: 'hidden', backgroundColor: '#0a0a1a' },
 });
 
 const bubbleStyles = StyleSheet.create({
