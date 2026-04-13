@@ -35,7 +35,7 @@ export default function ChatScreen() {
         if (history.length === 0) {
           const welcomeMsg = isGeneral
             ? "Hey there! 💜 I'm May, your AI habit coach and life companion. You can talk to me about anything — your goals, motivation, struggles, or just life in general. What's on your mind?"
-            : `Hi! I'm here to help you with your goal. How are you feeling about it today? Let's chat! 💪`;
+            : "Hi! I'm here to help you with your goal. How are you feeling about it today? Let's chat! 💪";
           setMessages([{ role: 'assistant', content: welcomeMsg, created_at: new Date().toISOString() }]);
         } else {
           setMessages(history);
@@ -44,6 +44,18 @@ export default function ChatScreen() {
       finally { setLoading(false); }
     })();
   }, [goalId]);
+
+  const handleBack = () => {
+    try {
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/(tabs)/chats');
+      }
+    } catch (e) {
+      router.replace('/(tabs)/chats');
+    }
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || sending) return;
@@ -79,9 +91,8 @@ export default function ChatScreen() {
 
   return (
     <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity testID="chat-back-btn" onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity testID="chat-back-btn" onPress={handleBack} style={styles.backBtn} activeOpacity={0.6}>
           <Ionicons name="arrow-back" size={24} color={colors.text_primary} />
         </TouchableOpacity>
         <MayAvatar size={36} showStatus />
@@ -91,7 +102,6 @@ export default function ChatScreen() {
         </View>
       </View>
 
-      {/* Messages */}
       {loading ? <View style={styles.centerContent}><ActivityIndicator size="large" color={colors.primary} /></View> : (
         <FlatList
           ref={flatListRef}
@@ -104,7 +114,6 @@ export default function ChatScreen() {
         />
       )}
 
-      {/* Typing indicator */}
       {sending && (
         <View style={styles.typingRow}>
           <MayAvatar size={24} />
@@ -114,7 +123,6 @@ export default function ChatScreen() {
         </View>
       )}
 
-      {/* Input */}
       <View style={[styles.inputBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
         <TextInput
           testID="chat-input"
@@ -124,7 +132,6 @@ export default function ChatScreen() {
           placeholder="Message May..."
           placeholderTextColor={colors.text_secondary}
           multiline
-          onSubmitEditing={sendMessage}
         />
         <TouchableOpacity testID="chat-send-btn" onPress={sendMessage} disabled={!input.trim() || sending} activeOpacity={0.7}>
           <LinearGradient
@@ -142,7 +149,7 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 }, centerContent: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   header: { paddingTop: 56, paddingBottom: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: 1 },
-  backBtn: { width: 44, height: 44, justifyContent: 'center' },
+  backBtn: { width: 44, height: 44, justifyContent: 'center', alignItems: 'center' },
   headerInfo: { flex: 1 },
   headerTitle: { fontSize: 17, fontWeight: '700' },
   headerSub: { fontSize: 12, marginTop: 1 },

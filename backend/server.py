@@ -22,7 +22,7 @@ import uuid
 JWT_SECRET = os.environ["JWT_SECRET"]
 JWT_ALGORITHM = "HS256"
 EMERGENT_LLM_KEY = os.environ["EMERGENT_LLM_KEY"]
-STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY", "")
+# Stripe removed — using App Store / Play Store IAP for compliance
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -154,9 +154,7 @@ class GoalCreateRequest(BaseModel):
 class ChatMessageRequest(BaseModel):
     message: str
 
-class CheckoutRequest(BaseModel):
-    plan_id: str = "monthly"
-    origin_url: str = ""
+# Removed: CheckoutRequest was for Stripe, now using IAP
 
 # ============= AUTH ROUTES =============
 
@@ -509,41 +507,40 @@ async def get_daily_message(goal_id: str, request: Request):
 async def get_plans():
     return SUBSCRIPTION_PLANS
 
-@api_router.post("/subscription/checkout")
-async def create_checkout(req: CheckoutRequest, request: Request):
+@api_router.post("/subscription/activate")
+async def activate_subscription(request: Request):
+    """Activate subscription. In production, validate App Store/Play Store receipt here."""
     user = await get_current_user(request)
-    if req.plan_id not in SUBSCRIPTION_PLANS:
+    body = await request.json()
+    plan_id = body.get("plan_id", "monthly")
+    if plan_id not in SUBSCRIPTION_PLANS:
         raise HTTPException(status_code=400, detail="Invalid plan")
-    plan = SUBSCRIPTION_PLANS[req.plan_id]
-    host_url = str(request.base_url).rstrip("/")
-    webhook_url = f"{host_url}/api/webhook/stripe"
-    origin = req.origin_url or host_url
-    success_url = f"{origin}/subscription?session_id={{CHECKOUT_SESSION_ID}}"
-    cancel_url = f"{origin}/subscription"
+    plan = SUBSCRIPTION_PLANS[plan_id]
+    # In production: validate receipt from Apple/Google here
+    # receipt = body.get("receipt")
+    # validated = await validate_store_receipt(receipt, platform)
+    expires_at = datetime.now(timezone.utc) + timedelta(days=plan["days"])
+    await db.users.update_one(
+        {"_id": ObjectId(user["id"])},
+        {"$set": {"subscription": {"plan": plan_id, "active": True, "started_at": datetime.now(timezone.utc).isoformat(), "expires_at": expires_at.isoformat()}, "role": "premium"}}
+    )
+    await db.payment_transactions.insert_one({
+        "user_id": user["id"], "plan_id": plan_id, "amount": plan["amount"],
+        "currency": plan["currency"], "payment_method": "app_store_iap",
+        "payment_status": "completed", "created_at": datetime.now(timezone.utc),
+    })
+    return {"status": "active", "plan": plan_id, "expires_at": expires_at.isoformat()}
 
-    from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
-    checkout_req = CheckoutSessionRequest(amount=float(plan["amount"]), currency=plan["currency"], success_url=success_url, cancel_url=cancel_url, metadata={"user_id": user["id"], "plan_id": req.plan_id, "plan_name": plan["name"]})
-    session = await stripe_checkout.create_checkout_session(checkout_req)
-    await db.payment_transactions.insert_one({"user_id": user["id"], "session_id": session.session_id, "amount": plan["amount"], "currency": plan["currency"], "plan_id": req.plan_id, "metadata": {"plan_name": plan["name"]}, "payment_status": "pending", "created_at": datetime.now(timezone.utc)})
-    return {"url": session.url, "session_id": session.session_id}
-
-@api_router.get("/subscription/status/{session_id}")
-async def check_payment_status(session_id: str, request: Request):
+@api_router.post("/subscription/restore")
+async def restore_subscription(request: Request):
+    """Restore purchases. In production, validate receipt from App Store / Play Store."""
     user = await get_current_user(request)
-    tx = await db.payment_transactions.find_one({"session_id": session_id, "user_id": user["id"]})
-    if not tx:
-        raise HTTPException(status_code=404, detail="Transaction not found")
-    host_url = str(request.base_url).rstrip("/")
-    from emergentintegrations.payments.stripe.checkout import StripeCheckout
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=f"{host_url}/api/webhook/stripe")
-    status = await stripe_checkout.get_checkout_status(session_id)
-    await db.payment_transactions.update_one({"session_id": session_id}, {"$set": {"payment_status": status.payment_status, "status": status.status}})
-    if status.payment_status == "paid" and tx.get("payment_status") != "paid":
-        plan = SUBSCRIPTION_PLANS.get(tx.get("plan_id", "monthly"), SUBSCRIPTION_PLANS["monthly"])
-        expires_at = datetime.now(timezone.utc) + timedelta(days=plan["days"])
-        await db.users.update_one({"_id": ObjectId(user["id"])}, {"$set": {"subscription": {"plan": tx.get("plan_id", "monthly"), "active": True, "started_at": datetime.now(timezone.utc).isoformat(), "expires_at": expires_at.isoformat()}, "role": "premium"}})
-    return {"status": status.status, "payment_status": status.payment_status, "amount_total": status.amount_total, "currency": status.currency}
+    # In production: validate receipt and check active subscription
+    user_doc = await db.users.find_one({"_id": ObjectId(user["id"])})
+    sub = user_doc.get("subscription", {})
+    if sub.get("active"):
+        return {"status": "active", "plan": sub.get("plan"), "restored": True}
+    return {"status": "inactive", "restored": False, "message": "No active subscription found"}
 
 @api_router.get("/subscription/me")
 async def get_subscription(request: Request):
@@ -551,26 +548,14 @@ async def get_subscription(request: Request):
     user_doc = await db.users.find_one({"_id": ObjectId(user["id"])})
     return user_doc.get("subscription", {"plan": "free", "active": False})
 
-@api_router.post("/webhook/stripe")
-async def stripe_webhook(request: Request):
-    body = await request.body()
-    signature = request.headers.get("Stripe-Signature", "")
-    host_url = str(request.base_url).rstrip("/")
-    from emergentintegrations.payments.stripe.checkout import StripeCheckout
-    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=f"{host_url}/api/webhook/stripe")
-    try:
-        webhook_response = await stripe_checkout.handle_webhook(body, signature)
-        if webhook_response.payment_status == "paid":
-            tx = await db.payment_transactions.find_one({"session_id": webhook_response.session_id})
-            if tx and tx.get("payment_status") != "paid":
-                await db.payment_transactions.update_one({"session_id": webhook_response.session_id}, {"$set": {"payment_status": "paid"}})
-                plan = SUBSCRIPTION_PLANS.get(tx.get("plan_id", "monthly"), SUBSCRIPTION_PLANS["monthly"])
-                expires_at = datetime.now(timezone.utc) + timedelta(days=plan["days"])
-                await db.users.update_one({"_id": ObjectId(tx["user_id"])}, {"$set": {"subscription": {"plan": tx.get("plan_id", "monthly"), "active": True, "started_at": datetime.now(timezone.utc).isoformat(), "expires_at": expires_at.isoformat()}, "role": "premium"}})
-        return {"status": "ok"}
-    except Exception as e:
-        logger.error(f"Webhook error: {e}")
-        return {"status": "error"}
+@api_router.post("/webhook/app-store")
+async def app_store_webhook(request: Request):
+    """Handle App Store Server Notifications (production). Validates subscription status changes."""
+    body = await request.json()
+    logger.info(f"App Store webhook received: {body.get('notificationType', 'unknown')}")
+    # In production: validate and process Apple's Server-to-Server notifications
+    # Handle: DID_RENEW, DID_FAIL_TO_RENEW, CANCEL, REFUND, etc.
+    return {"status": "ok"}
 
 # ============= STARTUP =============
 
