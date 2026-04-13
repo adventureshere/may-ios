@@ -433,6 +433,40 @@ async def get_chat_history(goal_id: str, request: Request):
             m["created_at"] = m["created_at"].isoformat()
     return messages
 
+# ============= GENERAL CHAT WITH MAY =============
+
+@api_router.post("/chat/general")
+async def send_general_chat(req: ChatMessageRequest, request: Request):
+    user = await get_current_user(request)
+    now = datetime.now(timezone.utc)
+    await db.chat_messages.insert_one({"goal_id": "general", "user_id": user["id"], "role": "user", "content": req.message, "created_at": now})
+    history = await db.chat_messages.find({"goal_id": "general", "user_id": user["id"]}).sort("created_at", -1).limit(20).to_list(20)
+    history.reverse()
+    history_text = "\n".join([f"{'User' if m['role'] == 'user' else 'May'}: {m['content']}" for m in history[:-1]])
+    goals = await db.goals.find({"user_id": user["id"], "status": "active"}).to_list(10)
+    goals_ctx = ", ".join([f"{g['title']} ({g['category']})" for g in goals]) or "None yet"
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    try:
+        chat = LlmChat(api_key=EMERGENT_LLM_KEY, session_id=f"general-{uuid.uuid4()}",
+            system_message=f"You are May, a warm friendly AI habit coach and life companion. Chat about goals, motivation, wellness, or anything. Be warm, encouraging, personal. Use emojis occasionally. Keep responses 2-4 sentences.\nUser's active goals: {goals_ctx}\n{f'Recent conversation:{chr(10)}{history_text}' if history_text else ''}"
+        ).with_model("gemini", "gemini-3-flash-preview")
+        ai_text = await chat.send_message(UserMessage(text=req.message))
+    except Exception as e:
+        logger.error(f"General chat failed: {e}")
+        ai_text = "Hey! I'm having a little moment, but I'm still here for you! What's on your mind? 💜"
+    ai_time = datetime.now(timezone.utc)
+    await db.chat_messages.insert_one({"goal_id": "general", "user_id": user["id"], "role": "assistant", "content": ai_text, "created_at": ai_time})
+    return {"user_message": {"role": "user", "content": req.message, "created_at": now.isoformat()}, "ai_message": {"role": "assistant", "content": ai_text, "created_at": ai_time.isoformat()}}
+
+@api_router.get("/chat/general")
+async def get_general_chat_history(request: Request):
+    user = await get_current_user(request)
+    messages = await db.chat_messages.find({"goal_id": "general", "user_id": user["id"]}, {"_id": 0, "user_id": 0}).sort("created_at", 1).to_list(100)
+    for m in messages:
+        if isinstance(m.get("created_at"), datetime):
+            m["created_at"] = m["created_at"].isoformat()
+    return messages
+
 # ============= DAILY MESSAGE =============
 
 @api_router.get("/goals/{goal_id}/daily-message")
